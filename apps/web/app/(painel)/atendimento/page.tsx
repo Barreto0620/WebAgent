@@ -10,13 +10,13 @@ export default async function AtendimentoPage({ searchParams }: { searchParams: 
   if (!active) redirect("/sistemas");
   const { c } = await searchParams;
 
-  const [{ data: members }, { data: quickReplies }] = await Promise.all([
+  const [{ data: members }, { data: quickReplies }, { data: profiles }] = await Promise.all([
     supabase.from("system_members").select("user_id, role").eq("system_id", active.id),
     supabase.from("quick_replies").select("id, shortcut, title, body").eq("system_id", active.id).order("shortcut"),
+    // RLS já limita aos colegas de sistema: dá para buscar junto, sem esperar a lista de membros
+    supabase.from("profiles").select("id, full_name, avatar_url"),
   ]);
   const ids = [...new Set([...(members ?? []).map((m) => m.user_id), user.id])];
-  const { data: profiles } = await supabase.from("profiles").select("id, full_name, avatar_url").in("id", ids);
-
   const team = ids.map((id) => {
     const p = profiles?.find((x) => x.id === id);
     return { id, name: p?.full_name || "Usuário", avatar: p?.avatar_url ?? null };

@@ -19,8 +19,10 @@ export async function updateSession(request: NextRequest) {
     },
   });
 
-  const { data } = await supabase.auth.getClaims();
-  const user = data?.claims;
+  // Lê a sessão do cookie e só chama o servidor de autenticação quando o token expira (renovação).
+  // A validação de verdade acontece no banco (RLS) e na API em cada consulta.
+  const { data } = await supabase.auth.getSession();
+  const user = data.session?.access_token ? true : null;
   const path = request.nextUrl.pathname;
   const isPublic = PUBLIC_PATHS.some((p) => path === p || path.startsWith(`${p}/`));
 

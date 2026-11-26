@@ -7,37 +7,71 @@ import { createClient } from "./supabase/server";
 
 export type SystemRow = Pick<Tables<"systems">, "id" | "slug" | "name" | "color" | "protocol_prefix" | "timezone" | "description" | "is_active">;
 
-/** Usuário, perfil, sistemas que ele acessa e o sistema ativo (cookie). Cacheado por requisição. */
+export interface PanelStatus {
+  channels: string[];
+  hours: { weekday: number; enabled: boolean; opens_at: string; closes_at: string; break_start: string | null; break_end: string | null }[];
+  holidays: { date: string; name: string }[];
+  queued: number;
+}
+
+interface PanelContext {
+  profile: { id: string; full_name: string; avatar_url: string | null; theme: string; is_platform_admin: boolean } | null;
+  systems: SystemRow[];
+  members: { system_id: string; role: "admin" | "supervisor" | "agent" }[];
+  active_id: string | null;
+  status: PanelStatus | null;
+}
+
+/**
+ * Sessão do painel, cacheada por requisição.
+ *
+ * Desempenho: o usuário vem do cookie (sem ida ao servidor de autenticação) e todo o contexto
+ * (perfil, sistemas, papéis, status) chega numa única chamada ao banco (panel_context).
+ * Segurança: o proxy renova a sessão a cada requisição e o banco valida o JWT em toda
+ * consulta (RLS). Ações que alteram dados usam getUser() ou passam pela API, que também valida.
+ */
 export const getSession = cache(async () => {
   const supabase = await createClient();
-  const { data: auth } = await supabase.auth.getUser();
-  if (!auth.user) redirect("/login");
+  const [{ data: auth }, cookieStore] = await Promise.all([supabase.auth.getSession(), cookies()]);
+  const claims = decodeJwt(auth.session?.access_token);
+  if (!claims?.sub) redirect("/login");
+  const sessionUser = { id: claims.sub, email: claims.email };
 
-  const [{ data: profile }, { data: systems }, { data: memberships }] = await Promise.all([
-    supabase.from("profiles").select("*").eq("id", auth.user.id).single(),
-    supabase.from("systems").select("id, slug, name, color, protocol_prefix, timezone, description, is_active").order("name"),
-    supabase.from("system_members").select("system_id, role").eq("user_id", auth.user.id),
-  ]);
+  const wanted = cookieStore.get(ACTIVE_SYSTEM_COOKIE)?.value ?? null;
+  const { data, error } = await supabase.rpc("panel_context", { p_active: wanted });
+  // Token rejeitado pelo banco: limpa a sessão (evita ciclo entre /login e o painel)
+  if (error || !data) redirect("/auth/expirada");
+  const ctx = data as unknown as PanelContext;
 
-  const list = (systems ?? []) as SystemRow[];
-  const cookieStore = await cookies();
-  const wanted = cookieStore.get(ACTIVE_SYSTEM_COOKIE)?.value;
-  const active = list.find((s) => s.id === wanted) ?? list.find((s) => s.is_active) ?? list[0] ?? null;
-  const isPlatformAdmin = Boolean(profile?.is_platform_admin);
-  const roleIn = (systemId: string) =>
-    isPlatformAdmin ? "admin" : (memberships?.find((m) => m.system_id === systemId)?.role ?? null);
+  const systems = ctx.systems ?? [];
+  const active = systems.find((s) => s.id === ctx.active_id) ?? null;
+  const isPlatformAdmin = Boolean(ctx.profile?.is_platform_admin);
+  const roleIn = (systemId: string) => (isPlatformAdmin ? "admin" : (ctx.members.find((m) => m.system_id === systemId)?.role ?? null));
 
   return {
     supabase,
-    user: auth.user,
-    profile,
-    systems: list,
+    user: { id: sessionUser.id, email: sessionUser.email ?? "" },
+    profile: ctx.profile,
+    systems,
     active,
+    status: ctx.status,
     isPlatformAdmin,
     role: active ? roleIn(active.id) : null,
     roleIn,
   };
 });
+
+/** Lê o conteúdo do JWT (sem validar: quem valida é o banco/API a cada consulta). */
+function decodeJwt(token: string | undefined): { sub: string; email?: string } | null {
+  if (!token) return null;
+  try {
+    const payload = token.split(".")[1];
+    if (!payload) return null;
+    return JSON.parse(Buffer.from(payload, "base64url").toString("utf8")) as { sub: string; email?: string };
+  } catch {
+    return null;
+  }
+}
 
 export function canManage(role: string | null, min: "supervisor" | "admin") {
   const rank: Record<string, number> = { agent: 1, supervisor: 2, admin: 3 };

@@ -10,6 +10,9 @@ export default async function LoginPage({ searchParams }: { searchParams: Promis
     <AuthShell>
       <h2 className="text-2xl font-extrabold">Entrar</h2>
       <p className="mt-1 text-sm text-muted">Use o e-mail e a senha que a WebCash liberou para você.</p>
+      {erro === "sessao" && (
+        <p className="mt-4 rounded-lg border border-gold/40 bg-gold/10 px-3 py-2 text-sm text-gold">Sua sessão expirou. Entre novamente.</p>
+      )}
       {erro === "link" && (
         <p className="mt-4 rounded-lg border border-danger/40 bg-danger/10 px-3 py-2 text-sm text-danger">
           O link expirou ou já foi usado. Peça um novo em “Esqueci a senha”.

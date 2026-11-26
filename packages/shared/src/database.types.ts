@@ -992,6 +992,7 @@ export type Database = {
         Returns: undefined
       }
       next_protocol: { Args: { p_system: string }; Returns: string }
+      panel_context: { Args: { p_active?: string | null }; Returns: Json }
     }
     Enums: {
       social_provider: "instagram" | "facebook" | "tiktok"
