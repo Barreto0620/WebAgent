@@ -2,8 +2,9 @@
 import { useEffect, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
-import { Pause, Play, Trash2, X } from "lucide-react";
+import { Pause, Play, RefreshCw, Trash2, X } from "lucide-react";
 import { campaignAction, deleteCampaign } from "@/app/actions/campaigns";
+import { syncLeadCampaign } from "@/app/actions/leads";
 import { Button } from "@/components/ui/button";
 
 export function CampaignControls({ id, status }: { id: string; status: string }) {
@@ -86,4 +87,27 @@ export function AutoRefresh() {
     return () => clearInterval(t);
   }, [router]);
   return null;
+}
+
+/** Relê o link da planilha e acrescenta só as linhas novas. */
+export function SyncButton({ id }: { id: string }) {
+  const [pending, start] = useTransition();
+  const router = useRouter();
+  return (
+    <Button
+      size="sm"
+      variant="secondary"
+      loading={pending}
+      onClick={() =>
+        start(async () => {
+          const r = await syncLeadCampaign(id);
+          if (!r.ok) return void toast.error(r.error);
+          toast.success(r.data.added ? `${r.data.added} lead(s) novo(s) adicionado(s).` : "Nenhuma linha nova na planilha.");
+          router.refresh();
+        })
+      }
+    >
+      <RefreshCw className="size-4" /> Atualizar da planilha
+    </Button>
+  );
 }

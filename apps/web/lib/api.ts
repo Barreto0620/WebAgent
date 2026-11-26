@@ -11,7 +11,8 @@ export async function apiFetch<T>(path: string, init: { method?: string; body?: 
 
   const res = await fetch(`${API_URL}${path}`, {
     method: init.method ?? "GET",
-    headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+    // Content-Type só quando há corpo: a API recusa JSON vazio
+    headers: init.body === undefined ? { Authorization: `Bearer ${token}` } : { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
     body: init.body === undefined ? undefined : JSON.stringify(init.body),
     cache: "no-store",
     signal: AbortSignal.timeout(30_000),

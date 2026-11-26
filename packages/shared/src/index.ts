@@ -4,3 +4,4 @@ export * from "./phone";
 export * from "./template";
 export * from "./database.types";
 export * from "./social";
+export * from "./leads";

@@ -12,6 +12,11 @@ const config: NextConfig = {
   output: "standalone",
   poweredByHeader: false,
   transpilePackages: ["@webagent/shared"],
+  serverExternalPackages: ["exceljs"],
+  experimental: {
+    // Planilhas de leads são enviadas por server action
+    serverActions: { bodySizeLimit: "15mb" },
+  },
   outputFileTracingRoot: new URL("../../", import.meta.url).pathname,
   images: { remotePatterns: [{ protocol: "https", hostname: "*.supabase.co" }, { protocol: "https", hostname: "pps.whatsapp.net" }] },
   async headers() {

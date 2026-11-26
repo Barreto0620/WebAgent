@@ -24,7 +24,7 @@ export const WEBHOOK_EVENTS = [
 async function call<T>(method: string, path: string, body?: unknown, timeoutMs = 20_000): Promise<T> {
   const res = await fetch(`${config.EVOLUTION_URL}${path}`, {
     method,
-    headers: { "Content-Type": "application/json", apikey: config.EVOLUTION_API_KEY },
+    headers: body === undefined ? { apikey: config.EVOLUTION_API_KEY } : { "Content-Type": "application/json", apikey: config.EVOLUTION_API_KEY },
     body: body === undefined ? undefined : JSON.stringify(body),
     signal: AbortSignal.timeout(timeoutMs),
   });
@@ -120,6 +120,12 @@ export const evolution = {
       { number, text, delay: delayMs, linkPreview: true },
       30_000,
     );
+  },
+
+  /** Confere quais números têm WhatsApp (evita enviar para fixo ou número inexistente). */
+  async checkNumbers(instanceName: string, numbers: string[]) {
+    const r = await call<{ exists: boolean; number: string; jid?: string }[]>("POST", `/chat/whatsappNumbers/${instanceName}`, { numbers });
+    return Array.isArray(r) ? r : [];
   },
 
   async ping(): Promise<boolean> {

@@ -182,6 +182,15 @@ export type Database = {
       }
       campaigns: {
         Row: {
+          kind: string
+          source_name: string | null
+          source_url: string | null
+          mapping: Json
+          respect_day: boolean
+          followups_enabled: boolean
+          append_optout: boolean
+          replied: number
+          opted_out: number
           audience_tags: string[]
           created_at: string
           created_by: string | null
@@ -205,6 +214,15 @@ export type Database = {
           window_start: string
         }
         Insert: {
+          kind?: string
+          source_name?: string | null
+          source_url?: string | null
+          mapping?: Json
+          respect_day?: boolean
+          followups_enabled?: boolean
+          append_optout?: boolean
+          replied?: number
+          opted_out?: number
           audience_tags?: string[]
           created_at?: string
           created_by?: string | null
@@ -228,6 +246,15 @@ export type Database = {
           window_start?: string
         }
         Update: {
+          kind?: string
+          source_name?: string | null
+          source_url?: string | null
+          mapping?: Json
+          respect_day?: boolean
+          followups_enabled?: boolean
+          append_optout?: boolean
+          replied?: number
+          opted_out?: number
           audience_tags?: string[]
           created_at?: string
           created_by?: string | null
@@ -256,6 +283,15 @@ export type Database = {
       }
       campaign_recipients: {
         Row: {
+          lead_name: string | null
+          message: string | null
+          followups: Json
+          row_data: Json
+          send_after: string | null
+          step: number
+          next_at: string | null
+          last_sent_at: string | null
+          replied_at: string | null
           campaign_id: string
           contact_id: string
           error: string | null
@@ -266,6 +302,15 @@ export type Database = {
           system_id: string
         }
         Insert: {
+          lead_name?: string | null
+          message?: string | null
+          followups?: Json
+          row_data?: Json
+          send_after?: string | null
+          step?: number
+          next_at?: string | null
+          last_sent_at?: string | null
+          replied_at?: string | null
           campaign_id: string
           contact_id: string
           error?: string | null
@@ -276,6 +321,15 @@ export type Database = {
           system_id: string
         }
         Update: {
+          lead_name?: string | null
+          message?: string | null
+          followups?: Json
+          row_data?: Json
+          send_after?: string | null
+          step?: number
+          next_at?: string | null
+          last_sent_at?: string | null
+          replied_at?: string | null
           campaign_id?: string
           contact_id?: string
           error?: string | null

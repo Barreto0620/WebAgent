@@ -3,6 +3,8 @@ import { db } from "../lib/supabase";
 import { previewFor, type InboundMessage } from "../evolution/parse";
 import { queueText } from "./outbound";
 import { detectConsentKeyword, loadSystemContext, openState, parseCsat, pickGreeting, templateVars } from "./automations";
+import { isNoInterest } from "@webagent/shared";
+import { onContactReply, onLeadNoInterest } from "./campaigns";
 
 interface ChannelRow {
   id: string;
@@ -240,6 +242,34 @@ export async function handleInbound(channel: ChannelRow, msg: InboundMessage, lo
       ...(conversation.status === "pending" ? { status: conversation.assignee_id ? ("open" as const) : ("queued" as const) } : {}),
     })
     .eq("id", conversation.id);
+
+  // Campanhas: o contato respondeu → para os acompanhamentos (+3 / +7 dias)
+  await onContactReply(channel.system_id, contact.id).catch((err) => log.warn({ err }, "falha ao marcar resposta de campanha"));
+
+  // Lead de campanha diz que não tem interesse: registra descadastro (promessa feita na mensagem)
+  // e responde com o texto da planilha. Clientes que nunca receberam campanha não são afetados.
+  if (contact.consent_status !== "opt_out" && isNoInterest(msg.body)) {
+    const scripted = await onLeadNoInterest(channel.system_id, contact.id).catch(() => null);
+    if (scripted !== null) {
+      await db.from("contacts").update({ consent_status: "opt_out", consent_updated_at: new Date().toISOString() }).eq("id", contact.id);
+      await db.from("consent_events").insert({
+        system_id: channel.system_id,
+        contact_id: contact.id,
+        status: "opt_out",
+        source: "keyword",
+        evidence: `Lead disse que não tem interesse (mensagem ${msg.externalId}): "${(msg.body ?? "").slice(0, 60)}"`,
+      });
+      await queueText({
+        systemId: channel.system_id,
+        conversationId: conversation.id,
+        body: scripted || "Sem problemas, obrigado pelo retorno! Não enviaremos mais mensagens.",
+        senderType: "system",
+      });
+      // Já respondido pela automação: encerra para não ocupar a fila
+      await db.from("conversations").update({ status: "resolved", resolved_at: new Date().toISOString(), unread_count: 0 }).eq("id", conversation.id);
+      return;
+    }
+  }
 
   // LGPD: palavras-chave de consentimento
   const keyword = detectConsentKeyword(msg.body);

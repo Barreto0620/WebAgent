@@ -98,6 +98,29 @@ export function Chat({
     };
   }, [supabase, c.id]);
 
+  // Roteiro da planilha de leads (respostas prontas da linha deste contato)
+  const [scripts, setScripts] = useState<{ label: string; text: string }[]>([]);
+  useEffect(() => {
+    let alive = true;
+    supabase
+      .from("campaign_recipients")
+      .select("row_data, campaigns!inner(mapping, kind)")
+      .eq("contact_id", c.contact.id)
+      .gte("step", 1)
+      .order("sent_at", { ascending: false })
+      .limit(1)
+      .maybeSingle()
+      .then(({ data }) => {
+        if (!alive || !data) return;
+        const camp = data.campaigns as unknown as { mapping: { script?: string[] }; kind: string };
+        const row = data.row_data as Record<string, string>;
+        setScripts((camp.mapping?.script ?? []).map((label) => ({ label, text: (row[label] ?? "").trim() })).filter((x) => x.text));
+      });
+    return () => {
+      alive = false;
+    };
+  }, [supabase, c.contact.id]);
+
   // Zera não lidas ao abrir
   useEffect(() => {
     if (c.unread_count > 0) void markRead(c.id);
@@ -247,6 +270,7 @@ export function Chat({
           systemId={system.id}
           systemName={system.name}
           quickReplies={quickReplies}
+          scripts={scripts}
           onSent={onChanged}
         />
       </div>
@@ -349,6 +373,7 @@ function Composer({
   systemId,
   systemName,
   quickReplies,
+  scripts,
   onSent,
 }: {
   disabled: boolean;
@@ -356,6 +381,7 @@ function Composer({
   systemId: string;
   systemName: string;
   quickReplies: QuickReply[];
+  scripts: { label: string; text: string }[];
   onSent: () => void;
 }) {
   const [text, setText] = useState("");
@@ -447,6 +473,25 @@ function Composer({
             </li>
           ))}
         </ul>
+      )}
+      {scripts.length > 0 && !note && (
+        <div className="mb-2 flex items-center gap-1.5 overflow-x-auto pb-0.5 text-[12px]" aria-label="Roteiro do lead">
+          <span className="shrink-0 font-semibold text-muted">Roteiro:</span>
+          {scripts.map((sc) => (
+            <button
+              key={sc.label}
+              type="button"
+              title={sc.text}
+              onClick={() => {
+                setText(sc.text);
+                requestAnimationFrame(() => ref.current?.focus());
+              }}
+              className="shrink-0 rounded-full border border-primary/40 bg-primary/8 px-2.5 py-1 font-medium text-primary hover:bg-primary/15"
+            >
+              {sc.label}
+            </button>
+          ))}
+        </div>
       )}
       <div className="mb-2 flex gap-1 text-[12px]">
         <button onClick={() => setNote(false)} className={cn("rounded-md px-2.5 py-1 font-semibold", !note ? "bg-primary/15 text-primary" : "text-muted hover:text-fg")}>

@@ -17,7 +17,7 @@ export default async function CampanhasPage() {
   if (!canManage(role, "supervisor")) redirect("/dashboard");
   const { data: campaigns } = await supabase
     .from("campaigns")
-    .select("id, name, status, total, sent, failed, skipped, audience_tags, scheduled_at, created_at")
+    .select("id, name, status, total, sent, failed, skipped, replied, kind, source_name, audience_tags, scheduled_at, created_at")
     .eq("system_id", active.id)
     .order("created_at", { ascending: false })
     .limit(50);
@@ -27,7 +27,7 @@ export default async function CampanhasPage() {
       <PageHeader
         eyebrow={active.name}
         title="Campanhas"
-        description="Mensagens para listas de contatos. Só recebe quem aceitou (opt-in), com intervalo aleatório entre envios para proteger o número."
+        description="Prospecção de leads por planilha (arquivo ou link) e mensagens para clientes que aceitaram. Sempre com intervalo aleatório entre envios para proteger o número."
         action={
           <Link href="/campanhas/nova" className="inline-flex h-10 items-center gap-2 rounded-lg bg-primary px-4 text-sm font-semibold text-on-primary hover:bg-primary-hover">
             <Plus className="size-4" /> Nova campanha
@@ -58,7 +58,7 @@ export default async function CampanhasPage() {
                     <p className="flex flex-wrap gap-x-3 text-xs text-muted tabular">
                       <span>{c.sent} de {c.total} enviadas</span>
                       {c.failed > 0 && <span className="text-danger">{c.failed} falhas</span>}
-                      <span>{c.audience_tags.length ? c.audience_tags.map((t) => `#${t}`).join(" ") : "todos com opt-in"}</span>
+                      {c.kind === "leads" ? <span>{c.replied} responderam · {c.source_name ?? "planilha"}</span> : <span>{c.audience_tags.length ? c.audience_tags.map((t) => `#${t}`).join(" ") : "todos com opt-in"}</span>}
                       <span className="ml-auto">{timeAgo(c.created_at)}</span>
                     </p>
                   </Card>
