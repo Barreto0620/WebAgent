@@ -9,6 +9,8 @@ import { healthRoutes } from "./routes/health";
 import { webhookRoutes } from "./routes/webhooks";
 import { channelRoutes } from "./routes/channels";
 import { conversationRoutes } from "./routes/conversations";
+import { teamRoutes } from "./routes/team";
+import { contactRoutes } from "./routes/contacts";
 
 export async function buildApp() {
   const app = Fastify({
@@ -51,5 +53,7 @@ export async function buildApp() {
   await app.register(webhookRoutes);
   await app.register(channelRoutes);
   await app.register(conversationRoutes);
+  await app.register(teamRoutes);
+  await app.register(contactRoutes);
   return app;
 }

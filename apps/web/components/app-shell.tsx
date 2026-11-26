@@ -91,7 +91,7 @@ export function AppShell({
           </div>
         </header>
 
-        <main className="mx-auto w-full max-w-[1280px] flex-1 px-4 pt-5 pb-28 sm:px-6 lg:pb-10">{children}</main>
+        <main className={cn("mx-auto w-full flex-1 px-4 pt-5 pb-28 sm:px-6 lg:pb-10", path.startsWith("/atendimento") ? "max-w-none" : "max-w-[1280px]")}>{children}</main>
       </div>
 
       {/* Navegação inferior no celular */}

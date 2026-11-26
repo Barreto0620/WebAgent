@@ -53,7 +53,9 @@ export async function deliverMessage(messageId: string) {
     channels: { instance_name: string; status: string };
   };
   if (conv.channels.status !== "connected") {
-    throw new Error("WhatsApp desconectado. A mensagem será reenviada quando o número reconectar.");
+    const reason = "WhatsApp desconectado. Reconecte o número em Canais e reenvie.";
+    await db.from("messages").update({ status: "failed", error: reason }).eq("id", messageId);
+    throw new Error(reason);
   }
 
   try {

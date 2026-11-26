@@ -5,6 +5,7 @@ import { db } from "../lib/supabase";
 import { requireSystemRole, requireUser } from "../lib/auth";
 import { badRequest, notFound } from "../lib/errors";
 import { queueText } from "../services/outbound";
+import { outboundQueue } from "../queues";
 import { loadSystemContext, templateVars } from "../services/automations";
 
 const sendSchema = z.object({ body: z.string().trim().min(1).max(4096) });
@@ -63,6 +64,19 @@ export async function conversationRoutes(app: FastifyInstance) {
     await db.from("audit_logs").insert({
       system_id: conv.system_id, actor_id: user.id, action: "conversation.resolve", entity: "conversation", entity_id: conv.id,
     });
+    return { ok: true };
+  });
+
+  // Reenvia uma mensagem que falhou
+  app.post<{ Params: { id: string } }>("/messages/:id/retry", async (req) => {
+    const user = await requireUser(req);
+    const { data: msg } = await db.from("messages").select("id, system_id, status, direction").eq("id", req.params.id).maybeSingle();
+    if (!msg || msg.direction !== "out") throw notFound("Mensagem não encontrada.");
+    await requireSystemRole(user.id, msg.system_id);
+    if (msg.status !== "failed") throw badRequest("Só mensagens com falha podem ser reenviadas.");
+    await db.from("messages").update({ status: "queued", error: null }).eq("id", msg.id);
+    // jobId novo: o BullMQ ignora silenciosamente um jobId que já existe (falhas ficam guardadas)
+    await outboundQueue.add("send", { messageId: msg.id }, { jobId: `msg-${msg.id}-r${Date.now()}` });
     return { ok: true };
   });
 }

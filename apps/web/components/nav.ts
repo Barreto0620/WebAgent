@@ -12,6 +12,7 @@ import {
   UserCog,
   ShieldCheck,
   Settings,
+  Zap,
   type LucideIcon,
 } from "lucide-react";
 
@@ -37,6 +38,7 @@ export const NAV: { group?: string; items: NavItem[] }[] = [
     group: "Automação",
     items: [
       { href: "/automacoes", label: "Mensagens automáticas", icon: Workflow, min: "supervisor" },
+      { href: "/respostas-rapidas", label: "Respostas rápidas", icon: Zap, min: "supervisor" },
       { href: "/horarios", label: "Horários", icon: Clock, min: "supervisor" },
       { href: "/campanhas", label: "Campanhas", icon: Megaphone, soon: true },
       { href: "/publicacoes", label: "Publicações", icon: CalendarClock, soon: true },
@@ -48,7 +50,7 @@ export const NAV: { group?: string; items: NavItem[] }[] = [
       { href: "/sistemas", label: "Sistemas", icon: Boxes },
       { href: "/canais", label: "Canais", icon: Plug, min: "admin" },
       { href: "/relatorios", label: "Relatórios", icon: BarChart3, soon: true },
-      { href: "/equipe", label: "Equipe", icon: UserCog, soon: true },
+      { href: "/equipe", label: "Equipe", icon: UserCog, min: "admin" },
       { href: "/privacidade-dados", label: "Privacidade (LGPD)", icon: ShieldCheck, soon: true },
       { href: "/configuracoes", label: "Configurações", icon: Settings },
     ],

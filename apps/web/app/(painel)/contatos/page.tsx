@@ -7,6 +7,7 @@ import { EmptyState, PageHeader } from "@/components/ui/page-header";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { initials, timeAgo } from "@/lib/utils";
+import { NewContactButton, StartConversationButton } from "./contact-actions";
 
 export const metadata: Metadata = { title: "Contatos" };
 
@@ -37,10 +38,13 @@ export default async function ContatosPage({ searchParams }: { searchParams: Pro
   return (
     <div className="flex flex-col gap-6">
       <PageHeader eyebrow={active.name} title="Contatos" description="Quem já falou com este sistema pelo WhatsApp. O contato é criado sozinho na primeira mensagem." />
-      <form className="relative max-w-md">
+      <div className="flex flex-wrap items-start gap-3">
+      <form className="relative min-w-0 flex-1 basis-64 sm:max-w-md">
         <Search className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted" aria-hidden />
         <input name="q" defaultValue={q} placeholder="Buscar por nome ou telefone" aria-label="Buscar contatos" className="h-10 w-full rounded-lg border border-line bg-surface pr-3 pl-9 text-sm focus:border-primary focus:outline-none" />
       </form>
+      <NewContactButton />
+      </div>
 
       {(contacts ?? []).length === 0 ? (
         <EmptyState title={q ? "Nenhum contato encontrado" : "Nenhum contato ainda"} icon={<Users className="size-6" />}>
@@ -49,14 +53,15 @@ export default async function ContatosPage({ searchParams }: { searchParams: Pro
       ) : (
         <Card className="overflow-hidden">
           <div className="overflow-x-auto">
-            <table className="w-full min-w-[640px] text-sm">
+            <table className="w-full min-w-[720px] text-sm">
               <thead className="border-b border-line text-left text-xs text-muted">
                 <tr>
                   <th className="px-5 py-3 font-medium">Contato</th>
                   <th className="px-3 py-3 font-medium">Telefone</th>
                   <th className="px-3 py-3 font-medium">Consentimento</th>
                   <th className="px-3 py-3 font-medium">Etiquetas</th>
-                  <th className="px-5 py-3 text-right font-medium">Última mensagem</th>
+                  <th className="px-3 py-3 text-right font-medium">Última mensagem</th>
+                  <th className="px-5 py-3" />
                 </tr>
               </thead>
               <tbody className="divide-y divide-line">
@@ -76,7 +81,8 @@ export default async function ContatosPage({ searchParams }: { searchParams: Pro
                       <td className="px-3 py-3">
                         <span className="flex flex-wrap gap-1">{c.tags.map((t) => <Badge key={t}>{t}</Badge>)}</span>
                       </td>
-                      <td className="px-5 py-3 text-right text-muted">{timeAgo(c.last_inbound_at)}</td>
+                      <td className="px-3 py-3 text-right text-muted">{timeAgo(c.last_inbound_at) || "—"}</td>
+                      <td className="px-5 py-2 text-right"><StartConversationButton contactId={c.id} name={name} optedOut={c.consent_status === "opt_out"} /></td>
                     </tr>
                   );
                 })}
