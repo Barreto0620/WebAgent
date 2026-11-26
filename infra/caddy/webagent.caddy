@@ -1,5 +1,5 @@
 # Bloco a ACRESCENTAR no final do /opt/evolution/Caddyfile (não altera os blocos existentes).
-webcashcompany.tech, www.webcashcompany.tech {
+webagent.bookweb.tech {
 	encode zstd gzip
 	header {
 		-Server

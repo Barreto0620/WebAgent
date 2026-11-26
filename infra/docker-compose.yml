@@ -2,7 +2,7 @@
 # WebAgent · projeto Docker isolado na VPS
 # Não altera o Bookweb nem a Evolution atual. Só o painel (webagent_web)
 # entra na rede do Caddy existente (evolution-net), para ser publicado
-# em https://webcashcompany.tech. Nenhuma porta é aberta na VPS.
+# em https://webagent.bookweb.tech. Nenhuma porta é aberta na VPS.
 # =====================================================================
 name: webagent
 

@@ -13,7 +13,7 @@ export function LoginForm({ next }: { next?: string }) {
     <form action={action} className="mt-6 flex flex-col gap-4">
       <input type="hidden" name="next" value={next ?? ""} />
       <Field label="E-mail" htmlFor="email">
-        <Input id="email" name="email" type="email" autoComplete="email" required placeholder="voce@webcashcompany.tech" />
+        <Input id="email" name="email" type="email" autoComplete="email" required placeholder="voce@empresa.com.br" />
       </Field>
       <Field label="Senha" htmlFor="password">
         <div className="relative">

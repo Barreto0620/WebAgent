@@ -7,7 +7,7 @@ export const metadata: Metadata = { title: "Política de Privacidade" };
 const UPDATED = "26 de novembro de 2026";
 // TODO(WebCash): confirmar razão social, CNPJ e e-mail do encarregado (DPO) antes de publicar.
 const CONTROLLER = "WebCash Company";
-const DPO_EMAIL = "privacidade@webcashcompany.tech";
+const DPO_EMAIL = "privacidade@bookweb.tech";
 
 export default function PrivacidadePage() {
   return (
