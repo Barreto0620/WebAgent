@@ -33,8 +33,8 @@ export default async function DashboardPage() {
   const yesterday = new Date(new Date(since).getTime() - 86_400_000).toISOString();
 
   const [convsToday, convsYesterday, queue, resolvedToday, msgsToday, channels] = await Promise.all([
-    supabase.from("conversations").select("id, created_at, first_response_at, opened_outside_hours").eq("system_id", active.id).gte("created_at", since),
-    supabase.from("conversations").select("id", { count: "exact", head: true }).eq("system_id", active.id).gte("created_at", yesterday).lt("created_at", since),
+    supabase.from("conversations").select("id, created_at, first_response_at, opened_outside_hours").eq("system_id", active.id).neq("origin", "campaign").gte("created_at", since),
+    supabase.from("conversations").select("id", { count: "exact", head: true }).eq("system_id", active.id).neq("origin", "campaign").gte("created_at", yesterday).lt("created_at", since),
     supabase
       .from("conversations")
       .select("id, protocol, last_message_at, last_message_preview, created_at, contacts!inner(name, push_name)")

@@ -58,7 +58,7 @@ async function upsertContact(channel: ChannelRow, msg: InboundMessage) {
 async function getOrOpenConversation(channel: ChannelRow, contactId: string, outsideHours: boolean) {
   const { data: active } = await db
     .from("conversations")
-    .select("id, protocol, status, created_at")
+    .select("id, protocol, status, assignee_id, created_at")
     .eq("channel_id", channel.id)
     .eq("contact_id", contactId)
     .neq("status", "resolved")
@@ -78,12 +78,12 @@ async function getOrOpenConversation(channel: ChannelRow, contactId: string, out
       status: "queued",
       opened_outside_hours: outsideHours,
     })
-    .select("id, protocol, status, created_at")
+    .select("id, protocol, status, assignee_id, created_at")
     .single();
   if (error) {
     const { data: again } = await db
       .from("conversations")
-      .select("id, protocol, status, created_at")
+      .select("id, protocol, status, assignee_id, created_at")
       .eq("channel_id", channel.id)
       .eq("contact_id", contactId)
       .neq("status", "resolved")
@@ -237,7 +237,7 @@ export async function handleInbound(channel: ChannelRow, msg: InboundMessage, lo
       last_message_at: msg.timestamp.toISOString(),
       last_message_preview: previewFor(msg.type, msg.body),
       unread_count: (convNow?.unread_count ?? 0) + 1,
-      ...(conversation.status === "pending" ? { status: "open" as const } : {}),
+      ...(conversation.status === "pending" ? { status: conversation.assignee_id ? ("open" as const) : ("queued" as const) } : {}),
     })
     .eq("id", conversation.id);
 

@@ -25,3 +25,12 @@ export const maintenanceQueue = new Queue("maintenance", {
 export async function enqueueOutbound(messageId: string, delayMs = 0) {
   await outboundQueue.add("send", { messageId }, { jobId: `msg-${messageId}`, delay: delayMs });
 }
+
+export const campaignsQueue = new Queue<{ campaignId: string }>("campaigns", {
+  connection,
+  defaultJobOptions: { attempts: 3, backoff: { type: "exponential", delay: 30_000 }, removeOnComplete: 1_000, removeOnFail: 1_000 },
+});
+
+export async function scheduleCampaignTick(campaignId: string, delayMs: number) {
+  await campaignsQueue.add("tick", { campaignId }, { jobId: `camp-${campaignId}-${Date.now()}`, delay: Math.max(0, Math.round(delayMs)) });
+}

@@ -6,6 +6,7 @@ import { maintenanceQueue, type OutboundJob } from "./queues";
 import { deliverMessage } from "./services/outbound";
 import { runHeartbeat } from "./jobs/heartbeat";
 import { runRetention } from "./jobs/retention";
+import { campaignTick } from "./services/campaigns";
 
 export async function startWorkers(log: FastifyBaseLogger) {
   // Envio: 1 mensagem por vez, com intervalo mínimo entre envios (protege o número contra bloqueio)
@@ -33,6 +34,13 @@ export async function startWorkers(log: FastifyBaseLogger) {
   maintenance.on("completed", (job) => job.name === "heartbeat" && log.info("heartbeat do Supabase registrado"));
   maintenance.on("failed", (job, err) => log.error({ job: job?.name, err: err.message }, "tarefa de manutenção falhou"));
 
+  // Campanhas: um passo por vez (cada passo agenda o próximo com intervalo aleatório)
+  const campaigns = new Worker<{ campaignId: string }>("campaigns", async (job) => campaignTick(job.data.campaignId), {
+    connection: createRedis(),
+    concurrency: 1,
+  });
+  campaigns.on("failed", (job, err) => log.error({ campaign: job?.data.campaignId, err: err.message }, "passo de campanha falhou"));
+
   // Agenda repetida (idempotente: o BullMQ substitui o agendador com o mesmo id)
   await maintenanceQueue.upsertJobScheduler(
     "heartbeat",
@@ -47,6 +55,6 @@ export async function startWorkers(log: FastifyBaseLogger) {
   await maintenanceQueue.add("heartbeat", {}, { jobId: `heartbeat-boot-${new Date().toISOString().slice(0, 13)}` });
 
   return async () => {
-    await Promise.all([outbound.close(), maintenance.close()]);
+    await Promise.all([outbound.close(), maintenance.close(), campaigns.close()]);
   };
 }

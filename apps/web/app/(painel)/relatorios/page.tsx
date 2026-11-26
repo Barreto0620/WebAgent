@@ -35,6 +35,7 @@ export default async function RelatoriosPage({ searchParams }: { searchParams: P
       .from("conversations")
       .select("id, created_at, first_response_at, resolved_at, status, assignee_id, csat_score, opened_outside_hours")
       .eq("system_id", active.id)
+      .neq("origin", "campaign")
       .gte("created_at", since)
       .limit(10000),
     supabase.from("system_members").select("user_id").eq("system_id", active.id),

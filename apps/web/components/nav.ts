@@ -40,7 +40,7 @@ export const NAV: { group?: string; items: NavItem[] }[] = [
       { href: "/automacoes", label: "Mensagens automáticas", icon: Workflow, min: "supervisor" },
       { href: "/respostas-rapidas", label: "Respostas rápidas", icon: Zap, min: "supervisor" },
       { href: "/horarios", label: "Horários", icon: Clock, min: "supervisor" },
-      { href: "/campanhas", label: "Campanhas", icon: Megaphone, soon: true },
+      { href: "/campanhas", label: "Campanhas", icon: Megaphone, min: "supervisor" },
       { href: "/publicacoes", label: "Publicações", icon: CalendarClock, soon: true },
     ],
   },

@@ -14,6 +14,118 @@ export type Database = {
   }
   public: {
     Tables: {
+      campaigns: {
+        Row: {
+          audience_tags: string[]
+          created_at: string
+          created_by: string | null
+          daily_limit: number
+          failed: number
+          finished_at: string | null
+          id: string
+          max_interval_s: number
+          message: string
+          min_interval_s: number
+          name: string
+          scheduled_at: string | null
+          sent: number
+          skipped: number
+          started_at: string | null
+          status: Database["public"]["Enums"]["campaign_status"]
+          system_id: string
+          total: number
+          updated_at: string
+          window_end: string
+          window_start: string
+        }
+        Insert: {
+          audience_tags?: string[]
+          created_at?: string
+          created_by?: string | null
+          daily_limit?: number
+          failed?: number
+          finished_at?: string | null
+          id?: string
+          max_interval_s?: number
+          message: string
+          min_interval_s?: number
+          name: string
+          scheduled_at?: string | null
+          sent?: number
+          skipped?: number
+          started_at?: string | null
+          status?: Database["public"]["Enums"]["campaign_status"]
+          system_id: string
+          total?: number
+          updated_at?: string
+          window_end?: string
+          window_start?: string
+        }
+        Update: {
+          audience_tags?: string[]
+          created_at?: string
+          created_by?: string | null
+          daily_limit?: number
+          failed?: number
+          finished_at?: string | null
+          id?: string
+          max_interval_s?: number
+          message?: string
+          min_interval_s?: number
+          name?: string
+          scheduled_at?: string | null
+          sent?: number
+          skipped?: number
+          started_at?: string | null
+          status?: Database["public"]["Enums"]["campaign_status"]
+          system_id?: string
+          total?: number
+          updated_at?: string
+          window_end?: string
+          window_start?: string
+        }
+        Relationships: [
+          { foreignKeyName: "campaigns_system_id_fkey"; columns: ["system_id"]; isOneToOne: false; referencedRelation: "systems"; referencedColumns: ["id"] },
+        ]
+      }
+      campaign_recipients: {
+        Row: {
+          campaign_id: string
+          contact_id: string
+          error: string | null
+          id: string
+          message_id: string | null
+          sent_at: string | null
+          status: Database["public"]["Enums"]["recipient_status"]
+          system_id: string
+        }
+        Insert: {
+          campaign_id: string
+          contact_id: string
+          error?: string | null
+          id?: string
+          message_id?: string | null
+          sent_at?: string | null
+          status?: Database["public"]["Enums"]["recipient_status"]
+          system_id: string
+        }
+        Update: {
+          campaign_id?: string
+          contact_id?: string
+          error?: string | null
+          id?: string
+          message_id?: string | null
+          sent_at?: string | null
+          status?: Database["public"]["Enums"]["recipient_status"]
+          system_id?: string
+        }
+        Relationships: [
+          { foreignKeyName: "campaign_recipients_campaign_id_fkey"; columns: ["campaign_id"]; isOneToOne: false; referencedRelation: "campaigns"; referencedColumns: ["id"] },
+          { foreignKeyName: "campaign_recipients_contact_id_fkey"; columns: ["contact_id"]; isOneToOne: false; referencedRelation: "contacts"; referencedColumns: ["id"] },
+          { foreignKeyName: "campaign_recipients_message_id_fkey"; columns: ["message_id"]; isOneToOne: false; referencedRelation: "messages"; referencedColumns: ["id"] },
+          { foreignKeyName: "campaign_recipients_system_id_fkey"; columns: ["system_id"]; isOneToOne: false; referencedRelation: "systems"; referencedColumns: ["id"] },
+        ]
+      }
       audit_logs: {
         Row: {
           action: string
@@ -236,6 +348,7 @@ export type Database = {
       }
       conversations: {
         Row: {
+          origin: string
           csat_requested_at: string | null
           csat_answered_at: string | null
           assignee_id: string | null
@@ -256,6 +369,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          origin?: string
           csat_requested_at?: string | null
           csat_answered_at?: string | null
           assignee_id?: string | null
@@ -276,6 +390,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          origin?: string
           csat_requested_at?: string | null
           csat_answered_at?: string | null
           assignee_id?: string | null
@@ -659,6 +774,8 @@ export type Database = {
       next_protocol: { Args: { p_system: string }; Returns: string }
     }
     Enums: {
+      campaign_status: "draft" | "scheduled" | "running" | "paused" | "completed" | "canceled"
+      recipient_status: "pending" | "sent" | "failed" | "skipped"
       channel_status: "disconnected" | "connecting" | "connected" | "error"
       channel_type: "whatsapp" | "instagram" | "facebook" | "tiktok"
       consent_status: "unknown" | "opt_in" | "opt_out"
