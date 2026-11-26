@@ -14,6 +14,172 @@ export type Database = {
   }
   public: {
     Tables: {
+      social_accounts: {
+        Row: {
+          avatar_url: string | null
+          connected_by: string | null
+          created_at: string
+          external_id: string
+          id: string
+          name: string
+          provider: Database["public"]["Enums"]["social_provider"]
+          status: string
+          status_detail: string | null
+          system_id: string
+          token_expires_at: string | null
+          updated_at: string
+          username: string | null
+        }
+        Insert: {
+          avatar_url?: string | null
+          connected_by?: string | null
+          created_at?: string
+          external_id: string
+          id?: string
+          name: string
+          provider: Database["public"]["Enums"]["social_provider"]
+          status?: string
+          status_detail?: string | null
+          system_id: string
+          token_expires_at?: string | null
+          updated_at?: string
+          username?: string | null
+        }
+        Update: {
+          avatar_url?: string | null
+          connected_by?: string | null
+          created_at?: string
+          external_id?: string
+          id?: string
+          name?: string
+          provider?: Database["public"]["Enums"]["social_provider"]
+          status?: string
+          status_detail?: string | null
+          system_id?: string
+          token_expires_at?: string | null
+          updated_at?: string
+          username?: string | null
+        }
+        Relationships: [
+          { foreignKeyName: "social_accounts_system_id_fkey"; columns: ["system_id"]; isOneToOne: false; referencedRelation: "systems"; referencedColumns: ["id"] },
+        ]
+      }
+      social_account_secrets: {
+        Row: {
+          access_token: string
+          account_id: string
+          extra: Json
+          refresh_expires_at: string | null
+          refresh_token: string | null
+          updated_at: string
+        }
+        Insert: {
+          access_token: string
+          account_id: string
+          extra?: Json
+          refresh_expires_at?: string | null
+          refresh_token?: string | null
+          updated_at?: string
+        }
+        Update: {
+          access_token?: string
+          account_id?: string
+          extra?: Json
+          refresh_expires_at?: string | null
+          refresh_token?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          { foreignKeyName: "social_account_secrets_account_id_fkey"; columns: ["account_id"]; isOneToOne: true; referencedRelation: "social_accounts"; referencedColumns: ["id"] },
+        ]
+      }
+      posts: {
+        Row: {
+          caption: string
+          created_at: string
+          created_by: string | null
+          error: string | null
+          hashtags: string[]
+          id: string
+          media: Json
+          published_at: string | null
+          scheduled_at: string | null
+          status: Database["public"]["Enums"]["post_status"]
+          system_id: string
+          updated_at: string
+        }
+        Insert: {
+          caption?: string
+          created_at?: string
+          created_by?: string | null
+          error?: string | null
+          hashtags?: string[]
+          id?: string
+          media?: Json
+          published_at?: string | null
+          scheduled_at?: string | null
+          status?: Database["public"]["Enums"]["post_status"]
+          system_id: string
+          updated_at?: string
+        }
+        Update: {
+          caption?: string
+          created_at?: string
+          created_by?: string | null
+          error?: string | null
+          hashtags?: string[]
+          id?: string
+          media?: Json
+          published_at?: string | null
+          scheduled_at?: string | null
+          status?: Database["public"]["Enums"]["post_status"]
+          system_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          { foreignKeyName: "posts_system_id_fkey"; columns: ["system_id"]; isOneToOne: false; referencedRelation: "systems"; referencedColumns: ["id"] },
+        ]
+      }
+      post_targets: {
+        Row: {
+          account_id: string
+          error: string | null
+          external_id: string | null
+          id: string
+          permalink: string | null
+          post_id: string
+          published_at: string | null
+          status: Database["public"]["Enums"]["post_target_status"]
+          system_id: string
+        }
+        Insert: {
+          account_id: string
+          error?: string | null
+          external_id?: string | null
+          id?: string
+          permalink?: string | null
+          post_id: string
+          published_at?: string | null
+          status?: Database["public"]["Enums"]["post_target_status"]
+          system_id: string
+        }
+        Update: {
+          account_id?: string
+          error?: string | null
+          external_id?: string | null
+          id?: string
+          permalink?: string | null
+          post_id?: string
+          published_at?: string | null
+          status?: Database["public"]["Enums"]["post_target_status"]
+          system_id?: string
+        }
+        Relationships: [
+          { foreignKeyName: "post_targets_account_id_fkey"; columns: ["account_id"]; isOneToOne: false; referencedRelation: "social_accounts"; referencedColumns: ["id"] },
+          { foreignKeyName: "post_targets_post_id_fkey"; columns: ["post_id"]; isOneToOne: false; referencedRelation: "posts"; referencedColumns: ["id"] },
+          { foreignKeyName: "post_targets_system_id_fkey"; columns: ["system_id"]; isOneToOne: false; referencedRelation: "systems"; referencedColumns: ["id"] },
+        ]
+      }
       campaigns: {
         Row: {
           audience_tags: string[]
@@ -774,6 +940,9 @@ export type Database = {
       next_protocol: { Args: { p_system: string }; Returns: string }
     }
     Enums: {
+      social_provider: "instagram" | "facebook" | "tiktok"
+      post_status: "draft" | "scheduled" | "publishing" | "published" | "partial" | "failed" | "canceled"
+      post_target_status: "pending" | "publishing" | "published" | "failed"
       campaign_status: "draft" | "scheduled" | "running" | "paused" | "completed" | "canceled"
       recipient_status: "pending" | "sent" | "failed" | "skipped"
       channel_status: "disconnected" | "connecting" | "connected" | "error"

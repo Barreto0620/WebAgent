@@ -1,10 +1,10 @@
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
-import { Camera, Globe, Music2 } from "lucide-react";
+import { Suspense } from "react";
 import { canManage, getSession } from "@/lib/session";
 import { PageHeader } from "@/components/ui/page-header";
-import { Card } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
+import { socialProviders } from "@/app/actions/social";
+import { SocialAccounts } from "./social-accounts";
 import { WhatsAppChannels } from "./whatsapp-channels";
 
 export const metadata: Metadata = { title: "Canais" };
@@ -20,39 +20,19 @@ export default async function CanaisPage() {
     .eq("system_id", active.id)
     .eq("type", "whatsapp")
     .order("created_at");
-
-  const soon = [
-    { name: "Instagram", icon: Camera, note: "Direct e comentários · exige conta Business e aprovação da Meta" },
-    { name: "Facebook", icon: Globe, note: "Messenger da Página · exige aprovação da Meta" },
-    { name: "TikTok", icon: Music2, note: "Publicações de vídeo · exige auditoria do app no TikTok" },
-  ];
+  const [{ data: social }, configured] = await Promise.all([
+    supabase.from("social_accounts").select("id, provider, name, avatar_url, status, status_detail, created_at").eq("system_id", active.id).order("provider"),
+    socialProviders(),
+  ]);
 
   return (
     <div className="flex flex-col gap-6">
-      <PageHeader eyebrow={active.name} title="Canais" description="Conecte o número de WhatsApp deste sistema. As outras redes entram aqui nas próximas etapas." />
+      <PageHeader eyebrow={active.name} title="Canais" description="O número de WhatsApp do atendimento e as redes sociais usadas em Publicações." />
       <WhatsAppChannels systemId={active.id} systemName={active.name} channels={channels ?? []} />
 
-      <section aria-labelledby="soon-title" className="flex flex-col gap-3">
-        <h2 id="soon-title" className="text-sm font-bold text-muted">Próximas redes</h2>
-        <ul className="grid gap-3 sm:grid-cols-3">
-          {soon.map((s) => {
-            const Icon = s.icon;
-            return (
-              <li key={s.name}>
-                <Card className="flex h-full items-start gap-3 p-4 opacity-75">
-                  <Icon className="mt-0.5 size-5 text-muted" aria-hidden />
-                  <div>
-                    <p className="flex items-center gap-2 text-sm font-semibold">
-                      {s.name} <Badge>em breve</Badge>
-                    </p>
-                    <p className="mt-1 text-xs text-muted">{s.note}</p>
-                  </div>
-                </Card>
-              </li>
-            );
-          })}
-        </ul>
-      </section>
+      <Suspense>
+        <SocialAccounts accounts={social ?? []} configured={configured} />
+      </Suspense>
     </div>
   );
 }

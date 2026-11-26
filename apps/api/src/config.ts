@@ -21,6 +21,16 @@ const schema = z.object({
   /** Intervalo do ping de manutenção no Supabase (horas). Padrão: 24h. */
   HEARTBEAT_INTERVAL_HOURS: z.coerce.number().min(1).max(144).default(24),
 
+  /** Endereço público do painel (usado no retorno do login das redes sociais). */
+  PUBLIC_APP_URL: z.url().default("https://webagent.bookweb.tech"),
+  /** App da Meta (Facebook/Instagram). Opcional: sem ele, a conexão fica indisponível no painel. */
+  META_APP_ID: z.string().optional(),
+  META_APP_SECRET: z.string().optional(),
+  META_GRAPH_VERSION: z.string().default("v23.0"),
+  /** App do TikTok (Content Posting API). Opcional. */
+  TIKTOK_CLIENT_KEY: z.string().optional(),
+  TIKTOK_CLIENT_SECRET: z.string().optional(),
+
   /** Intervalo mínimo entre envios do mesmo worker (ms) para proteger o número. */
   SEND_MIN_INTERVAL_MS: z.coerce.number().int().min(300).default(1200),
 });

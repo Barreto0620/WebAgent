@@ -1,7 +1,7 @@
 import { config } from "./config";
 import { buildApp } from "./app";
 import { startWorkers } from "./workers";
-import { campaignsQueue, connection, maintenanceQueue, outboundQueue } from "./queues";
+import { campaignsQueue, connection, maintenanceQueue, outboundQueue, publishingQueue } from "./queues";
 
 const app = await buildApp();
 const stopWorkers = await startWorkers(app.log);
@@ -16,7 +16,7 @@ async function shutdown(signal: string) {
   app.log.info({ signal }, "encerrando com segurança");
   await app.close();
   await stopWorkers();
-  await Promise.all([outboundQueue.close(), maintenanceQueue.close(), campaignsQueue.close()]);
+  await Promise.all([outboundQueue.close(), maintenanceQueue.close(), campaignsQueue.close(), publishingQueue.close()]);
   connection.disconnect();
   process.exit(0);
 }

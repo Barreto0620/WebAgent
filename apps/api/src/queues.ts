@@ -34,3 +34,12 @@ export const campaignsQueue = new Queue<{ campaignId: string }>("campaigns", {
 export async function scheduleCampaignTick(campaignId: string, delayMs: number) {
   await campaignsQueue.add("tick", { campaignId }, { jobId: `camp-${campaignId}-${Date.now()}`, delay: Math.max(0, Math.round(delayMs)) });
 }
+
+export const publishingQueue = new Queue<{ postId: string }>("publishing", {
+  connection,
+  defaultJobOptions: { attempts: 1, removeOnComplete: 500, removeOnFail: 500 },
+});
+
+export async function schedulePublish(postId: string, delayMs: number) {
+  await publishingQueue.add("publish", { postId }, { jobId: `post-${postId}-${Date.now()}`, delay: Math.max(0, Math.round(delayMs)) });
+}

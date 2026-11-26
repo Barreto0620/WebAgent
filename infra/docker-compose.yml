@@ -43,6 +43,13 @@ services:
       WEBHOOK_SECRET: ${WEBHOOK_SECRET}
       HEARTBEAT_INTERVAL_HOURS: ${HEARTBEAT_INTERVAL_HOURS:-24}
       SEND_MIN_INTERVAL_MS: ${SEND_MIN_INTERVAL_MS:-1200}
+      PUBLIC_APP_URL: ${PUBLIC_APP_URL:-https://webagent.bookweb.tech}
+      # Redes sociais (opcional): sem estes valores, a conexão fica desativada no painel
+      META_APP_ID: ${META_APP_ID:-}
+      META_APP_SECRET: ${META_APP_SECRET:-}
+      META_GRAPH_VERSION: ${META_GRAPH_VERSION:-v23.0}
+      TIKTOK_CLIENT_KEY: ${TIKTOK_CLIENT_KEY:-}
+      TIKTOK_CLIENT_SECRET: ${TIKTOK_CLIENT_SECRET:-}
     depends_on:
       webagent-redis: { condition: service_healthy }
       webagent-evolution: { condition: service_started }

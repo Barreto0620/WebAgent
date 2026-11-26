@@ -13,6 +13,7 @@ import { teamRoutes } from "./routes/team";
 import { contactRoutes } from "./routes/contacts";
 import { privacyRoutes } from "./routes/privacy";
 import { campaignRoutes } from "./routes/campaigns";
+import { socialRoutes } from "./routes/social";
 
 export async function buildApp() {
   const app = Fastify({
@@ -59,5 +60,6 @@ export async function buildApp() {
   await app.register(contactRoutes);
   await app.register(privacyRoutes);
   await app.register(campaignRoutes);
+  await app.register(socialRoutes);
   return app;
 }

@@ -44,8 +44,15 @@ pnpm -r typecheck && pnpm --filter @webagent/shared test && pnpm --filter @webag
 
 Veja [docs/DEPLOY.md](docs/DEPLOY.md).
 
-## Etapas
+## Módulos
 
-- **Etapa 1 (em andamento):** login, layout, sistemas, canais (QR/código), horários e feriados, mensagens automáticas, configurações, LGPD (cookies, opt-out, política). Próxima entrega: tela de atendimento em tempo real.
-- **Etapa 2:** campanhas, relatórios/SLA, equipe e permissões, IA com base de conhecimento, painel LGPD.
-- **Etapa 3:** publicações multi-rede e canais Instagram/Facebook/TikTok.
+| Módulo | O que faz |
+|---|---|
+| Atendimento | Caixa de entrada em tempo real, fila, assumir, transferir, notas internas, respostas rápidas, resolver com pesquisa de satisfação |
+| Automação | Boas-vindas, fora do horário, feriados, encerramento, CSAT, descadastro por SAIR/VOLTAR |
+| Contatos | Cadastro, etiquetas, consentimento com evidência, iniciar conversa |
+| Campanhas | Só opt-in, intervalo aleatório, janela de horário, limite diário, pausa automática |
+| Publicações | Instagram, Facebook e TikTok via APIs oficiais, calendário e agendamento ([guia](docs/REDES-SOCIAIS.md)) |
+| Relatórios | 1ª resposta, resolução, CSAT, por atendente, exportação CSV |
+| Equipe | Contas, papéis (atendente, supervisor, administrador) por sistema |
+| LGPD | Cookies, pedidos do titular (15 dias), exportação, anonimização, retenção diária, auditoria |

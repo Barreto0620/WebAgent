@@ -41,7 +41,7 @@ export const NAV: { group?: string; items: NavItem[] }[] = [
       { href: "/respostas-rapidas", label: "Respostas rápidas", icon: Zap, min: "supervisor" },
       { href: "/horarios", label: "Horários", icon: Clock, min: "supervisor" },
       { href: "/campanhas", label: "Campanhas", icon: Megaphone, min: "supervisor" },
-      { href: "/publicacoes", label: "Publicações", icon: CalendarClock, soon: true },
+      { href: "/publicacoes", label: "Publicações", icon: CalendarClock },
     ],
   },
   {

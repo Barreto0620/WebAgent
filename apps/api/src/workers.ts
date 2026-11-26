@@ -7,6 +7,7 @@ import { deliverMessage } from "./services/outbound";
 import { runHeartbeat } from "./jobs/heartbeat";
 import { runRetention } from "./jobs/retention";
 import { campaignTick } from "./services/campaigns";
+import { publishPost } from "./services/publishing";
 
 export async function startWorkers(log: FastifyBaseLogger) {
   // Envio: 1 mensagem por vez, com intervalo mínimo entre envios (protege o número contra bloqueio)
@@ -41,6 +42,14 @@ export async function startWorkers(log: FastifyBaseLogger) {
   });
   campaigns.on("failed", (job, err) => log.error({ campaign: job?.data.campaignId, err: err.message }, "passo de campanha falhou"));
 
+  // Publicações nas redes sociais
+  const publishing = new Worker<{ postId: string }>("publishing", async (job) => publishPost(job.data.postId), {
+    connection: createRedis(),
+    concurrency: 1,
+    lockDuration: 15 * 60_000,
+  });
+  publishing.on("failed", (job, err) => log.error({ post: job?.data.postId, err: err.message }, "publicação falhou"));
+
   // Agenda repetida (idempotente: o BullMQ substitui o agendador com o mesmo id)
   await maintenanceQueue.upsertJobScheduler(
     "heartbeat",
@@ -55,6 +64,6 @@ export async function startWorkers(log: FastifyBaseLogger) {
   await maintenanceQueue.add("heartbeat", {}, { jobId: `heartbeat-boot-${new Date().toISOString().slice(0, 13)}` });
 
   return async () => {
-    await Promise.all([outbound.close(), maintenance.close(), campaigns.close()]);
+    await Promise.all([outbound.close(), maintenance.close(), campaigns.close(), publishing.close()]);
   };
 }
