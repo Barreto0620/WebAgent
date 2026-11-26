@@ -1,3 +1,4 @@
+import { publicUrl } from "@/lib/env";
 import { NextResponse, type NextRequest } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 
@@ -5,5 +6,5 @@ import { createClient } from "@/lib/supabase/server";
 export async function GET(request: NextRequest) {
   const supabase = await createClient();
   await supabase.auth.signOut({ scope: "local" });
-  return NextResponse.redirect(new URL("/login?erro=sessao", request.nextUrl.origin));
+  return NextResponse.redirect(publicUrl("/login?erro=sessao"));
 }

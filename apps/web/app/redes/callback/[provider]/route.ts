@@ -1,3 +1,4 @@
+import { publicUrl } from "@/lib/env";
 import { NextResponse, type NextRequest } from "next/server";
 import { apiFetch } from "@/lib/api";
 
@@ -5,7 +6,7 @@ import { apiFetch } from "@/lib/api";
 export async function GET(request: NextRequest, { params }: { params: Promise<{ provider: string }> }) {
   const { provider } = await params;
   const url = request.nextUrl;
-  const back = new URL("/canais", url.origin);
+  const back = publicUrl("/canais");
   const code = url.searchParams.get("code");
   const state = url.searchParams.get("state");
   const denied = url.searchParams.get("error") ?? url.searchParams.get("error_reason");
