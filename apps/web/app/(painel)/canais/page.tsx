@@ -28,7 +28,7 @@ export default async function CanaisPage() {
   return (
     <div className="flex flex-col gap-6">
       <PageHeader eyebrow={active.name} title="Canais" description="O número de WhatsApp do atendimento e as redes sociais usadas em Publicações." />
-      <WhatsAppChannels systemId={active.id} systemName={active.name} channels={channels ?? []} />
+      <WhatsAppChannels key={active.id} systemId={active.id} systemName={active.name} channels={channels ?? []} />
 
       <Suspense>
         <SocialAccounts accounts={social ?? []} configured={configured} />
