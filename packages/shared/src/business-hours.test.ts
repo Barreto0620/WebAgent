@@ -37,3 +37,9 @@ test("telefone", () => {
 test("template", () => {
   assert.equal(renderTemplate("Olá {{primeiro_nome}}, protocolo {{protocolo}}", { primeiro_nome: "Ana", protocolo: "BW-1" }), "Olá Ana, protocolo BW-1");
 });
+
+import { startOfDayInZone, hourInZone } from "./business-hours";
+test("início do dia em São Paulo", () => {
+  assert.equal(startOfDayInZone(new Date("2026-11-26T02:30:00Z"), "America/Sao_Paulo"), "2026-11-25T03:00:00.000Z");
+  assert.equal(hourInZone(new Date("2026-11-26T13:15:00Z"), "America/Sao_Paulo"), 10);
+});

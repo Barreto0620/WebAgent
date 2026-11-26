@@ -1,0 +1,9 @@
+# Bloco a ACRESCENTAR no final do /opt/evolution/Caddyfile (não altera os blocos existentes).
+webcashcompany.tech, www.webcashcompany.tech {
+	encode zstd gzip
+	header {
+		-Server
+		Strict-Transport-Security "max-age=63072000; includeSubDomains; preload"
+	}
+	reverse_proxy webagent_web:3000
+}

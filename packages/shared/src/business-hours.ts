@@ -92,3 +92,18 @@ export function describeHours(rules: BusinessHoursRule[]): string {
   }
   return enabled.map((r) => `${names[r.weekday]} ${r.opens_at}–${r.closes_at}`).join(" · ");
 }
+
+/** Início do dia (00:00) no fuso informado, em ISO UTC. Ex.: hoje em São Paulo → "2026-11-26T03:00:00.000Z". */
+export function startOfDayInZone(date: Date, timeZone: string): string {
+  const { isoDate } = zonedParts(date, timeZone);
+  const offsetPart = new Intl.DateTimeFormat("en-US", { timeZone, timeZoneName: "longOffset" })
+    .formatToParts(date)
+    .find((p) => p.type === "timeZoneName")?.value ?? "GMT";
+  const offset = offsetPart === "GMT" ? "+00:00" : offsetPart.replace("GMT", "");
+  return new Date(`${isoDate}T00:00:00${offset}`).toISOString();
+}
+
+/** Hora (0–23) de um instante no fuso informado. */
+export function hourInZone(date: Date, timeZone: string): number {
+  return Math.floor(zonedParts(date, timeZone).minutes / 60);
+}

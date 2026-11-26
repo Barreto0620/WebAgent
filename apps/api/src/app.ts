@@ -16,6 +16,13 @@ export async function buildApp() {
       level: config.LOG_LEVEL,
       // LGPD: não registrar conteúdo de mensagens nem tokens
       redact: ["req.headers.authorization", "req.headers.apikey", "*.body", "*.text"],
+      serializers: {
+        // Não registrar o segredo que vai no caminho do webhook
+        req: (req: { method: string; url: string }) => ({
+          method: req.method,
+          url: req.url.replace(/(\/webhooks\/evolution\/)[^/]+/, "$1***"),
+        }),
+      },
       ...(config.NODE_ENV === "development" ? { transport: { target: "pino-pretty" } } : {}),
     },
     trustProxy: true,

@@ -5,7 +5,7 @@ import { db } from "../lib/supabase";
 
 export async function healthRoutes(app: FastifyInstance) {
   // Liveness: usado pelo healthcheck do Docker
-  app.get("/health", { config: { rateLimit: false } }, async () => ({ ok: true }));
+  app.get("/health", { logLevel: "silent", config: { rateLimit: false } }, async () => ({ ok: true }));
 
   // Readiness detalhado (interno)
   app.get("/health/deep", async (_req, reply) => {

@@ -1,0 +1,121 @@
+@import "tailwindcss";
+@import "@fontsource-variable/inter";
+@import "@fontsource-variable/plus-jakarta-sans";
+
+/* Tema: escuro por padrão (como a logo WebCash). data-theme="light" troca para o claro. */
+@custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
+
+:root,
+[data-theme="dark"] {
+  --bg: #070908;
+  --surface: #0f1411;
+  --surface-2: #161c18;
+  --surface-3: #1d2520;
+  --line: #232d26;
+  --fg: #e8efea;
+  --muted: #8f9a92;
+  --primary: #2bd14a;
+  --primary-hover: #4ade6a;
+  --on-primary: #06210e;
+  --gold: #e9a23b;
+  --danger: #e5484d;
+  --sidebar: #0a0d0b;
+  --sidebar-line: #1a211c;
+  --sidebar-fg: #cfd6d1;
+  --ring: rgba(43, 209, 74, 0.45);
+  --bubble-in: #161c18;
+  --bubble-out: #123a1e;
+  color-scheme: dark;
+}
+
+[data-theme="light"] {
+  --bg: #f5f7f5;
+  --surface: #ffffff;
+  --surface-2: #ecf1ed;
+  --surface-3: #e1e8e3;
+  --line: #dce4de;
+  --fg: #101712;
+  --muted: #5c6a60;
+  --primary: #12923a;
+  --primary-hover: #0e7a30;
+  --on-primary: #ffffff;
+  --gold: #b97710;
+  --danger: #d12f35;
+  --sidebar: #0a0d0b;
+  --sidebar-line: #1a211c;
+  --sidebar-fg: #cfd6d1;
+  --ring: rgba(18, 146, 58, 0.35);
+  --bubble-in: #ffffff;
+  --bubble-out: #dcf5e1;
+  color-scheme: light;
+}
+
+@theme inline {
+  --color-bg: var(--bg);
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
+  --color-surface-3: var(--surface-3);
+  --color-line: var(--line);
+  --color-fg: var(--fg);
+  --color-muted: var(--muted);
+  --color-primary: var(--primary);
+  --color-primary-hover: var(--primary-hover);
+  --color-on-primary: var(--on-primary);
+  --color-gold: var(--gold);
+  --color-danger: var(--danger);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-line: var(--sidebar-line);
+  --color-sidebar-fg: var(--sidebar-fg);
+  --color-neon: #2bd14a;
+  --font-sans: "Inter Variable", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Plus Jakarta Sans Variable", "Inter Variable", ui-sans-serif, system-ui, sans-serif;
+}
+
+html,
+body {
+  background: var(--bg);
+  color: var(--fg);
+}
+
+body {
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+h1,
+h2,
+h3 {
+  font-family: var(--font-display);
+  letter-spacing: -0.01em;
+  text-wrap: balance;
+}
+
+:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 2px;
+}
+
+.tabular {
+  font-variant-numeric: tabular-nums;
+}
+
+/* Brilho sutil do verde da marca, usado só em pontos de destaque */
+.glow-neon {
+  box-shadow: 0 0 0 1px rgba(43, 209, 74, 0.35), 0 0 24px -6px rgba(43, 209, 74, 0.45);
+}
+
+.grid-bg {
+  background-image: linear-gradient(rgba(43, 209, 74, 0.06) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(43, 209, 74, 0.06) 1px, transparent 1px);
+  background-size: 28px 28px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}

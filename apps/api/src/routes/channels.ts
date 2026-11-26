@@ -66,7 +66,12 @@ export async function channelRoutes(app: FastifyInstance) {
       number = n;
     }
     await evolution.setWebhook(channel.instance_name).catch(() => undefined);
-    const qr = await evolution.connect(channel.instance_name, number);
+    // A Evolution pode levar alguns segundos para gerar o QR depois de abrir a sessão
+    let qr = await evolution.connect(channel.instance_name, number);
+    for (let i = 0; i < 4 && !qr.base64 && !qr.pairingCode; i++) {
+      await new Promise((r) => setTimeout(r, 1500));
+      qr = await evolution.connect(channel.instance_name, number);
+    }
     await db.from("channels").update({ status: "connecting", last_status_at: new Date().toISOString() }).eq("id", channel.id);
     return { qrBase64: qr.base64 ?? null, pairingCode: qr.pairingCode ?? null };
   });
