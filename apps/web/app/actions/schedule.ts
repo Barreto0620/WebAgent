@@ -82,6 +82,8 @@ const settingsSchema = z.object({
   closing_enabled: z.boolean(),
   closing_message: z.string().trim().min(5).max(1000),
   opt_out_message: z.string().trim().min(5).max(500),
+  csat_enabled: z.boolean(),
+  csat_message: z.string().trim().min(5).max(500),
 });
 
 export async function saveAutomations(input: unknown): Promise<{ ok: boolean; error?: string }> {

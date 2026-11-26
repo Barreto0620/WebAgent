@@ -1,7 +1,7 @@
 "use client";
 import { useRef, useState, useTransition } from "react";
 import { toast } from "sonner";
-import { Hand, MoonStar, CheckCircle2, ShieldOff } from "lucide-react";
+import { Hand, MoonStar, CheckCircle2, ShieldOff, Star } from "lucide-react";
 import { renderTemplate } from "@webagent/shared";
 import { saveAutomations } from "@/app/actions/schedule";
 import { Button } from "@/components/ui/button";
@@ -17,9 +17,11 @@ interface Settings {
   closing_enabled: boolean;
   closing_message: string;
   opt_out_message: string;
+  csat_enabled: boolean;
+  csat_message: string;
 }
 
-type MsgKey = "welcome_message" | "away_message" | "closing_message" | "opt_out_message";
+type MsgKey = "welcome_message" | "away_message" | "closing_message" | "csat_message" | "opt_out_message";
 
 const VARIABLES = [
   { key: "{{primeiro_nome}}", label: "Primeiro nome" },
@@ -32,6 +34,7 @@ const BLOCKS: { msg: MsgKey; toggle?: keyof Settings; title: string; when: strin
   { msg: "welcome_message", toggle: "welcome_enabled", title: "Boas-vindas", when: "Primeira mensagem de uma conversa nova, dentro do horário.", icon: Hand },
   { msg: "away_message", toggle: "away_enabled", title: "Fora do horário", when: "Primeira mensagem fora do horário, em pausa ou feriado.", icon: MoonStar },
   { msg: "closing_message", toggle: "closing_enabled", title: "Encerramento", when: "Quando o atendente clica em Resolver.", icon: CheckCircle2 },
+  { msg: "csat_message", toggle: "csat_enabled", title: "Pesquisa de satisfação", when: "Logo após o encerramento. A nota (1 a 5) aparece em Relatórios.", icon: Star },
   { msg: "opt_out_message", title: "Descadastro (LGPD)", when: "Quando o cliente envia SAIR, PARAR ou STOP. Sempre ativo.", icon: ShieldOff },
 ];
 

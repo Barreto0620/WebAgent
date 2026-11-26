@@ -236,6 +236,8 @@ export type Database = {
       }
       conversations: {
         Row: {
+          csat_requested_at: string | null
+          csat_answered_at: string | null
           assignee_id: string | null
           channel_id: string
           contact_id: string
@@ -254,6 +256,8 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          csat_requested_at?: string | null
+          csat_answered_at?: string | null
           assignee_id?: string | null
           channel_id: string
           contact_id: string
@@ -272,6 +276,8 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          csat_requested_at?: string | null
+          csat_answered_at?: string | null
           assignee_id?: string | null
           channel_id?: string
           contact_id?: string
@@ -545,6 +551,8 @@ export type Database = {
       }
       system_settings: {
         Row: {
+          csat_enabled: boolean
+          csat_message: string
           away_enabled: boolean
           away_message: string
           closing_enabled: boolean
@@ -558,6 +566,8 @@ export type Database = {
           welcome_message: string
         }
         Insert: {
+          csat_enabled?: boolean
+          csat_message?: string
           away_enabled?: boolean
           away_message?: string
           closing_enabled?: boolean
@@ -571,6 +581,8 @@ export type Database = {
           welcome_message?: string
         }
         Update: {
+          csat_enabled?: boolean
+          csat_message?: string
           away_enabled?: boolean
           away_message?: string
           closing_enabled?: boolean

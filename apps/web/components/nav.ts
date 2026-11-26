@@ -49,9 +49,9 @@ export const NAV: { group?: string; items: NavItem[] }[] = [
     items: [
       { href: "/sistemas", label: "Sistemas", icon: Boxes },
       { href: "/canais", label: "Canais", icon: Plug, min: "admin" },
-      { href: "/relatorios", label: "Relatórios", icon: BarChart3, soon: true },
+      { href: "/relatorios", label: "Relatórios", icon: BarChart3, min: "supervisor" },
       { href: "/equipe", label: "Equipe", icon: UserCog, min: "admin" },
-      { href: "/privacidade-dados", label: "Privacidade (LGPD)", icon: ShieldCheck, soon: true },
+      { href: "/privacidade-dados", label: "Privacidade (LGPD)", icon: ShieldCheck, min: "supervisor" },
       { href: "/configuracoes", label: "Configurações", icon: Settings },
     ],
   },

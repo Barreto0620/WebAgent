@@ -36,6 +36,8 @@ export default async function AutomacoesPage() {
           closing_enabled: settings.closing_enabled,
           closing_message: settings.closing_message,
           opt_out_message: settings.opt_out_message,
+          csat_enabled: settings.csat_enabled,
+          csat_message: settings.csat_message,
         }}
         sample={{ sistema: active.name, horario, protocolo: `${active.protocol_prefix}-261126-0042`, nome: "Marina Souza", primeiro_nome: "Marina" }}
       />

@@ -5,7 +5,7 @@ process.env.SUPABASE_SERVICE_ROLE_KEY ??= "test-service-role-key-000000";
 process.env.EVOLUTION_API_KEY ??= "test-evolution-key-0000";
 process.env.WEBHOOK_SECRET ??= "0".repeat(32);
 
-const { detectConsentKeyword, pickGreeting, templateVars, openState } = await import("./automations");
+const { detectConsentKeyword, pickGreeting, templateVars, openState, parseCsat } = await import("./automations");
 
 const ctx = {
   id: "s1",
@@ -20,6 +20,8 @@ const ctx = {
     closing_message: "",
     opt_out_message: "",
     welcome_cooldown_minutes: 720,
+    csat_enabled: true,
+    csat_message: "",
   },
   hours: [1, 2, 3, 4, 5].map((d) => ({ weekday: d, enabled: true, opens_at: "08:00", closes_at: "18:00" })),
   holidays: [{ date: "2026-12-25", name: "Natal" }],
@@ -43,4 +45,12 @@ test("fora do horário e feriado", () => {
   assert.equal(pickGreeting(ctx, night, templateVars(ctx, null, "P1")), "Horário: seg. a sex., 08:00–18:00. Protocolo P1.");
   const xmas = openState(ctx, new Date("2026-12-25T13:00:00Z"));
   assert.match(pickGreeting(ctx, xmas, templateVars(ctx, null, "P2")) ?? "", /feriado \(Natal\)/);
+});
+
+test("nota de satisfação", () => {
+  assert.equal(parseCsat("5"), 5);
+  assert.equal(parseCsat(" 4! "), 4);
+  assert.equal(parseCsat("3\ufe0f\u20e3"), 3);
+  assert.equal(parseCsat("6"), null);
+  assert.equal(parseCsat("nota 5"), null);
 });

@@ -2,7 +2,7 @@ import type { FastifyBaseLogger } from "fastify";
 import { db } from "../lib/supabase";
 import { previewFor, type InboundMessage } from "../evolution/parse";
 import { queueText } from "./outbound";
-import { detectConsentKeyword, loadSystemContext, openState, pickGreeting, templateVars } from "./automations";
+import { detectConsentKeyword, loadSystemContext, openState, parseCsat, pickGreeting, templateVars } from "./automations";
 
 interface ChannelRow {
   id: string;
@@ -155,6 +155,50 @@ export async function handleInbound(channel: ChannelRow, msg: InboundMessage, lo
       { onConflict: "system_id,external_id", ignoreDuplicates: true },
     );
     return;
+  }
+
+  // Resposta à pesquisa de satisfação de uma conversa encerrada (até 24 h depois)
+  const score = parseCsat(msg.body);
+  if (score !== null) {
+    const since = new Date(Date.now() - 24 * 3_600_000).toISOString();
+    const { data: pendingCsat } = await db
+      .from("conversations")
+      .select("id")
+      .eq("channel_id", channel.id)
+      .eq("contact_id", contact.id)
+      .eq("status", "resolved")
+      .is("csat_score", null)
+      .gte("csat_requested_at", since)
+      .order("csat_requested_at", { ascending: false })
+      .limit(1)
+      .maybeSingle();
+    if (pendingCsat) {
+      await db
+        .from("conversations")
+        .update({ csat_score: score, csat_answered_at: new Date().toISOString() })
+        .eq("id", pendingCsat.id);
+      await db.from("messages").upsert(
+        {
+          system_id: channel.system_id,
+          conversation_id: pendingCsat.id,
+          direction: "in",
+          sender_type: "contact",
+          type: "text",
+          body: msg.body,
+          external_id: msg.externalId,
+          status: "received",
+          created_at: msg.timestamp.toISOString(),
+        },
+        { onConflict: "system_id,external_id", ignoreDuplicates: true },
+      );
+      await queueText({
+        systemId: channel.system_id,
+        conversationId: pendingCsat.id,
+        body: score >= 4 ? "Obrigado pela avaliação! 💚" : "Obrigado pela avaliação. Vamos usar sua nota para melhorar.",
+        senderType: "system",
+      });
+      return;
+    }
   }
 
   const { conversation, created } = await getOrOpenConversation(channel, contact.id, !state.open);

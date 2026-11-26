@@ -57,9 +57,18 @@ export async function conversationRoutes(app: FastifyInstance) {
       const text = renderTemplate(ctx.settings.closing_message, templateVars(ctx, contact.name ?? contact.push_name, conv.protocol));
       await queueText({ systemId: conv.system_id, conversationId: conv.id, body: text, senderType: "system" });
     }
+    const csat = ctx.settings.csat_enabled && ctx.settings.csat_message.trim().length > 0;
+    if (csat) {
+      await queueText({ systemId: conv.system_id, conversationId: conv.id, body: ctx.settings.csat_message, senderType: "system" });
+    }
     await db
       .from("conversations")
-      .update({ status: "resolved", resolved_at: new Date().toISOString(), unread_count: 0 })
+      .update({
+        status: "resolved",
+        resolved_at: new Date().toISOString(),
+        unread_count: 0,
+        ...(csat ? { csat_requested_at: new Date().toISOString() } : {}),
+      })
       .eq("id", conv.id);
     await db.from("audit_logs").insert({
       system_id: conv.system_id, actor_id: user.id, action: "conversation.resolve", entity: "conversation", entity_id: conv.id,

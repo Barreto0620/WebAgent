@@ -41,6 +41,8 @@ export interface SystemContext {
     closing_message: string;
     opt_out_message: string;
     welcome_cooldown_minutes: number;
+    csat_enabled: boolean;
+    csat_message: string;
   };
   hours: BusinessHoursRule[];
   holidays: { date: string; name: string }[];
@@ -106,4 +108,11 @@ export function pickGreeting(ctx: SystemContext, state: OpenState, vars: Record<
   }
   if (state.open && ctx.settings.welcome_enabled) return renderTemplate(ctx.settings.welcome_message, vars);
   return null;
+}
+
+/** Nota de satisfação: aceita só "1".."5" (com ou sem pontuação/emoji de número). */
+export function parseCsat(text: string | null): number | null {
+  const t = (text ?? "").trim().replace(/[\u20e3\ufe0f]/g, "").replace(/[.!\s]/g, "");
+  if (!/^[1-5]$/.test(t)) return null;
+  return Number(t);
 }

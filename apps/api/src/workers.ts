@@ -5,6 +5,7 @@ import { createRedis } from "./lib/redis";
 import { maintenanceQueue, type OutboundJob } from "./queues";
 import { deliverMessage } from "./services/outbound";
 import { runHeartbeat } from "./jobs/heartbeat";
+import { runRetention } from "./jobs/retention";
 
 export async function startWorkers(log: FastifyBaseLogger) {
   // Envio: 1 mensagem por vez, com intervalo mínimo entre envios (protege o número contra bloqueio)
@@ -25,6 +26,7 @@ export async function startWorkers(log: FastifyBaseLogger) {
     "maintenance",
     async (job) => {
       if (job.name === "heartbeat") return runHeartbeat("worker");
+      if (job.name === "retention") return runRetention();
     },
     { connection: createRedis(), concurrency: 1 },
   );
@@ -37,6 +39,10 @@ export async function startWorkers(log: FastifyBaseLogger) {
     { every: config.HEARTBEAT_INTERVAL_HOURS * 3_600_000 },
     { name: "heartbeat" },
   );
+  // Retenção LGPD: todo dia às 03:30 (horário de Brasília)
+  await maintenanceQueue.upsertJobScheduler("retention", { pattern: "30 3 * * *", tz: "America/Sao_Paulo" }, { name: "retention" });
+  maintenance.on("completed", (job, result) => job.name === "retention" && log.info({ result }, "retenção executada"));
+
   // Um ping logo ao iniciar, para não depender do primeiro ciclo
   await maintenanceQueue.add("heartbeat", {}, { jobId: `heartbeat-boot-${new Date().toISOString().slice(0, 13)}` });
 
