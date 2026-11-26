@@ -222,8 +222,14 @@ export async function handleInbound(channel: ChannelRow, msg: InboundMessage, lo
 
   if (contact.consent_status === "opt_out") return;
 
-  // Primeira mensagem da conversa: boas-vindas ou aviso de fora do horário
-  if (created) {
+  // Boas-vindas ou aviso de fora do horário enquanto a conversa ainda não teve nenhuma resposta
+  // (cobre também conversas abertas cuja primeira tentativa falhou)
+  const { count: replies } = await db
+    .from("messages")
+    .select("id", { count: "exact", head: true })
+    .eq("conversation_id", conversation.id)
+    .eq("direction", "out");
+  if (created || (replies ?? 0) === 0) {
     const vars = templateVars(ctx, contact.name ?? contact.push_name ?? msg.pushName, conversation.protocol);
     const greeting = pickGreeting(ctx, state, vars);
     if (greeting) {
