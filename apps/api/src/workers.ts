@@ -1,0 +1,46 @@
+import { Worker, type Job } from "bullmq";
+import type { FastifyBaseLogger } from "fastify";
+import { config } from "./config";
+import { createRedis } from "./lib/redis";
+import { maintenanceQueue, type OutboundJob } from "./queues";
+import { deliverMessage } from "./services/outbound";
+import { runHeartbeat } from "./jobs/heartbeat";
+
+export async function startWorkers(log: FastifyBaseLogger) {
+  // Envio: 1 mensagem por vez, com intervalo mínimo entre envios (protege o número contra bloqueio)
+  const outbound = new Worker<OutboundJob>(
+    "outbound",
+    async (job: Job<OutboundJob>) => deliverMessage(job.data.messageId),
+    {
+      connection: createRedis(),
+      concurrency: 1,
+      limiter: { max: 1, duration: config.SEND_MIN_INTERVAL_MS },
+    },
+  );
+  outbound.on("failed", (job, err) =>
+    log.warn({ messageId: job?.data.messageId, attempt: job?.attemptsMade, err: err.message }, "envio falhou"),
+  );
+
+  const maintenance = new Worker(
+    "maintenance",
+    async (job) => {
+      if (job.name === "heartbeat") return runHeartbeat("worker");
+    },
+    { connection: createRedis(), concurrency: 1 },
+  );
+  maintenance.on("completed", (job) => job.name === "heartbeat" && log.info("heartbeat do Supabase registrado"));
+  maintenance.on("failed", (job, err) => log.error({ job: job?.name, err: err.message }, "tarefa de manutenção falhou"));
+
+  // Agenda repetida (idempotente: o BullMQ substitui o agendador com o mesmo id)
+  await maintenanceQueue.upsertJobScheduler(
+    "heartbeat",
+    { every: config.HEARTBEAT_INTERVAL_HOURS * 3_600_000 },
+    { name: "heartbeat" },
+  );
+  // Um ping logo ao iniciar, para não depender do primeiro ciclo
+  await maintenanceQueue.add("heartbeat", {}, { jobId: `heartbeat-boot-${new Date().toISOString().slice(0, 13)}` });
+
+  return async () => {
+    await Promise.all([outbound.close(), maintenance.close()]);
+  };
+}
